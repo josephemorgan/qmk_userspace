@@ -9,3 +9,8 @@
 *.hex
 *.bin
 *.uf2
+
+.build/**
+
+**/secrets.h
+**/.cache/**
