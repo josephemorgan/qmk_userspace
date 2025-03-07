@@ -19,20 +19,27 @@
 #define LCURL LSFT(KC_LBRC)
 #define RCURL LSFT(KC_RBRC)
 
-enum layers { _QWERTY = 0, _GAME, _SYMBOL, _NUMBER, _FUNCTION, _ADJUST, _TRANS };
-
-enum custom_keycodes { _ARROW = SAFE_RANGE, _JIGG };
+enum layers { _QWERTY = 0, _ONESHOT, _GAME, _SYMBOL, _NUMBER, _FUNCTION, _ADJUST, _TRANS };
+enum custom_keycodes { _FAT_ARROW = SAFE_RANGE, _ARROW, _JIGG };
 
 struct buffer *keyboard_buffer         = NULL;
 bool           is_mouse_jiggler_active = false;
+void           update_buffer(uint16_t);
+void           update_jiggler(uint16_t);
 
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_QWERTY] = LAYOUT(
         KC_GRV,         KC_Q,         KC_W,         KC_E,         KC_R,         KC_T,                                                                 KC_Y,         KC_U,         KC_I,         KC_O,      KC_P,        KC_TAB,
         KC_ESC,         KC_A,         KC_S,         KC_D,         KC_F,         KC_G,                                                                 KC_H,         KC_J,         KC_K,         KC_L,      KC_SCLN,     KC_ENT,
-        OSM(MOD_LSFT),       KC_Z,         KC_X,         KC_C,         KC_V,         KC_B,        LOWER,       FUNCTION,     FUNCTION,        RAISE,       KC_N,         KC_M,      KC_COMM,       KC_DOT,      KC_SLSH,     OSM(MOD_RSFT),
-        MO(_ADJUST),  OSM(MOD_LALT),     OSM(MOD_LGUI),     KC_SPC,      OSM(MOD_LCTL),      OSM(MOD_RCTL),     KC_BSPC,     OSM(MOD_RGUI),     OSM(MOD_RALT),        QK_LEAD
+        KC_LSFT,       KC_Z,         KC_X,         KC_C,         KC_V,         KC_B,        MO(_SYMBOL),       MO(_FUNCTION),     MO(_FUNCTION),        MO(_NUMBER),       KC_N,         KC_M,      KC_COMM,       KC_DOT,      KC_SLSH,     KC_RSFT,
+        MO(_ADJUST),  KC_LALT,     KC_LGUI,     KC_SPC,      KC_LCTL,      KC_RCTL,     KC_BSPC,     KC_RGUI,     KC_RALT,        QK_LEAD
+    ),
+    [_ONESHOT] = LAYOUT(
+              _______, _______, _______, _______,       _______,       _______,                                                       _______,       _______, _______, _______, _______,       _______,
+              _______, _______, _______, _______,       _______,       _______,                                                       _______,       _______, _______, _______, _______,       _______,
+        OSM(MOD_LSFT), _______, _______, _______,       _______,       _______,   LOWER,      FUNCTION,      FUNCTION,   RAISE,       _______,       _______, _______, _______, _______, OSM(MOD_RSFT),
+                                     MO(_ADJUST), OSM(MOD_LALT), OSM(MOD_LGUI), _______, OSM(MOD_LCTL), OSM(MOD_RCTL), _______, OSM(MOD_RGUI), OSM(MOD_RALT), _______
     ),
     [_GAME] = LAYOUT(
         _______, _______, _______,     _______, _______, _______,                                                _______, _______, _______, _______, _______, _______,
@@ -41,9 +48,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         MO(_ADJUST), KC_LALT,   KC_F6,     _______,       KC_LCTL,  _______, _______, _______, _______, _______
     ),
     [_SYMBOL] = LAYOUT(
-        _______, LSFT(KC_1),   LSFT(KC_2),   LSFT(KC_3),   LSFT(KC_4),   LSFT(KC_5),                                                         LSFT(KC_6),   LSFT(KC_7),   LSFT(KC_8),   LSFT(KC_9),   LSFT(KC_0),       LSFT(KC_EQL),
-        CWT,     _______,      _______,      _______,      _______,      _______,                                                            KC_LEFT,      KC_DOWN,        KC_UP,     KC_RIGHT,      KC_QUOTE, KC_EQL,
-        _______, _______,      _______,      _______,      _______,      _______,      _______,      _______,      _______,    _______,    _______,    _______,      _______,       _ARROW,      KC_BSLS,      LSFT(KC_BSLS),
+        _______, LSFT(KC_1),   LSFT(KC_2),   LSFT(KC_3),   LSFT(KC_4),   LSFT(KC_5),                                                         LSFT(KC_6),   LSFT(KC_7),   LSFT(KC_8),   LSFT(KC_9), LSFT(KC_0),   _______,
+        CWT,     _______,      _______,      _______,      _______,      _______,                                                            KC_LEFT,      KC_DOWN,        KC_UP,        KC_RIGHT,   KC_QUOTE,  _______,
+        _______, _______,      _______,      _______,      _______,      _______,      _______,      _______,      _______,    _______,    _______,    _______,           _ARROW,      _FAT_ARROW,    KC_BSLS, LSFT(KC_BSLS),
         _______,      _______,      _______,      _______,      _______,      _______,    _______,    _______,      _______,      _______
     ),
     [_NUMBER] = LAYOUT(
@@ -53,7 +60,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______, _______, _______,     _______, _______, _______, _______, _______
     ),
     [_FUNCTION] = LAYOUT(
-        _______,        KC_F1,        KC_F2,        KC_F3,        KC_F4,        KC_F5,                                                                KC_F6,        KC_F7,        KC_F8,        KC_F9,       KC_F10,      _______,
+       _______,        KC_F1,        KC_F2,        KC_F3,        KC_F4,        KC_F5,                                                                KC_F6,        KC_F7,        KC_F8,        KC_F9,       KC_F10,      _______,
         _______,       KC_F11,       KC_F12,       KC_F13,       KC_F14,       KC_F15,                                                               KC_F16,       KC_F17,       KC_F18,       KC_F19,       KC_F20,      _______,
         _______,       KC_F21,       KC_F22,       KC_F23,       KC_F24,      _______,      _______,      _______,      _______,      _______,      _______,      _______,      _______,      _______,      _______,      _______,
         _______,      _______,      _______,      _______,      _______,      _______,      _______,      _______,      _______,      _______
@@ -62,7 +69,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, LCAG(KC_1), LCAG(KC_2), LCAG(KC_3), LCAG(KC_4), LCAG(KC_5),                                 _______, _______, _______, _______, _______, _______,
         _______, _______, _______, _______, _______, _______,                                                UG_TOGG, UG_HUEU, UG_SATU, UG_VALU, UG_SPDU, _______,
         KC_LSFT, _______, _______, _______, _______, _______, _______,        _______,    _______, _______,  _______, RGB_MODE_FORWARD, RGB_MODE_REVERSE, _______, _______, KC_LSFT,
-        _______, TG(_GAME), DF(_QWERTY), OS_TOGG, _JIGG,                                      QK_LEAD, _______, _______, _______, _______
+        _______, TG(_GAME), DF(_QWERTY), TG(_ONESHOT), _JIGG,                                      QK_LEAD, _______, _______, _______, _______
     ),
     [_TRANS] = LAYOUT(
         _______, _______, _______, _______, _______, _______, _______,                                      _______, _______, _______, _______, _______,
@@ -74,7 +81,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // clang-format on
 //
 uint16_t throttle = 0;
-void     matrix_scan_user(void) {
+
+void matrix_scan_user(void) {
     if (is_mouse_jiggler_active && ++throttle % 128 == 0) {
         int direction = rand() % 4;
         int keycode;
@@ -100,16 +108,24 @@ void     matrix_scan_user(void) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (!record->event.pressed) {
-        return true;
+    if (record->event.pressed) {
+        update_jiggler(keycode);
+        update_buffer(keycode);
+
+        switch (keycode) {
+            case _FAT_ARROW:
+                SEND_STRING("=>");
+                break;
+            case _ARROW:
+                SEND_STRING("->");
+                break;
+        }
     }
 
-    if (is_mouse_jiggler_active) {
-        is_mouse_jiggler_active = false;
-    } else if (keycode == _JIGG) {
-        is_mouse_jiggler_active = true;
-    }
+    return true;
+}
 
+void update_buffer(uint16_t keycode) {
     if (keycode >= 0xe0 && keycode <= 0xe7) {
         add_keycode_to_buffer(keyboard_buffer, keycode);
     } else if (keycode >= KC_F1 && keycode <= KC_F12) {
@@ -118,8 +134,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     } else if (IS_QK_BASIC(keycode) && (keycode < 0xe0 || keycode > 0xe7)) {
         add_keycode_to_buffer(keyboard_buffer, keycode);
     }
+}
 
-    return true;
+void update_jiggler(uint16_t keycode) {
+    if (is_mouse_jiggler_active) {
+        is_mouse_jiggler_active = false;
+    } else if (keycode == _JIGG) {
+        is_mouse_jiggler_active = true;
+    }
 }
 
 void keyboard_post_init_user(void) {

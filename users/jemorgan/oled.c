@@ -14,16 +14,16 @@ void _render_keyboard_history(char*);
 void _render_layer_modifier_state(void);
 void _progress_cursor(const char*, uint8_t);
 
-const uint16_t _GAME_MASK     = 0x01;
-const uint16_t _SYMBOL_MASK   = 0x01 << 1;
-const uint16_t _NUMBER_MASK   = 0x01 << 2;
-const uint16_t _FUNCTION_MASK = 0x01 << 3;
-const uint16_t _ADJUST_MASK   = 0x01 << 4;
-const uint16_t _CTRL_MASK     = 0x01 << 5;
-const uint16_t _ALT_MASK      = 0x01 << 6;
-const uint16_t _GUI_MASK      = 0x01 << 7;
-const uint16_t _SHIFT_MASK    = 0x01 << 8;
-const uint16_t _OS_MASK       = 0x01 << 9;
+const uint16_t _ONESHOT_MASK  = 0x01;
+const uint16_t _GAME_MASK     = 0x01 << 1;
+const uint16_t _SYMBOL_MASK   = 0x01 << 2;
+const uint16_t _NUMBER_MASK   = 0x01 << 3;
+const uint16_t _FUNCTION_MASK = 0x01 << 4;
+const uint16_t _ADJUST_MASK   = 0x01 << 5;
+const uint16_t _CTRL_MASK     = 0x01 << 6;
+const uint16_t _ALT_MASK      = 0x01 << 7;
+const uint16_t _GUI_MASK      = 0x01 << 8;
+const uint16_t _SHIFT_MASK    = 0x01 << 9;
 
 struct oled_state* _state;
 char*              previous_buffer_string;
@@ -56,7 +56,8 @@ void try_render_oled() {
             _render_select_menu();
         } else {
             _render_layer_modifier_state();
-        } } // Renders the keypress buffer if it's changed
+        }
+    } // Renders the keypress buffer if it's changed
     if (strcmp(current_buffer_string, previous_buffer_string)) {
         _render_keyboard_history(current_buffer_string);
         memcpy(previous_buffer_string, current_buffer_string, _state->keypress_buffer->max_length);
@@ -72,7 +73,6 @@ uint16_t gen_active_layers_and_mods() {
     if ((get_mods() | get_oneshot_mods()) & MOD_MASK_ALT) layers |= _ALT_MASK;
     if ((get_mods() | get_oneshot_mods()) & MOD_MASK_GUI) layers |= _GUI_MASK;
     if ((get_mods() | get_oneshot_mods()) & MOD_MASK_SHIFT) layers |= _SHIFT_MASK;
-    if (keymap_config.oneshot_enable) layers |= _OS_MASK;
 
     return layers;
 }
@@ -82,9 +82,22 @@ void _add_to_left_column(const char* text, int row) {
     oled_write(text, false);
 }
 
-void _add_to_right_column(const char* text, int row) {
-    oled_set_cursor(oled_max_chars() - strlen(text), row + 2);
+void _add_to_right_column(const char* text, int row, bool is_active) {
+    oled_set_cursor(oled_max_chars() - strlen(text) - 2, row + 2);
+
+    if (is_active) {
+        oled_write(">", false);
+    } else {
+        oled_write(" ", false);
+    }
+
     oled_write(text, false);
+
+    if (is_active) {
+        oled_write("<", false);
+    } else {
+        oled_write(" ", false);
+    }
 }
 
 bool _is_mask_active(uint16_t mask) {
@@ -104,6 +117,14 @@ void _render_layer_modifier_state(void) {
     for (uint8_t i = 0; i < oled_max_chars(); ++i)
         oled_write_char('-', false);
 
+    if (_is_mask_active(_ONESHOT_MASK)) {
+        _add_to_left_column("Oneshot", left_column_count++);
+    }
+
+    if (_is_mask_active(_GAME_MASK)) {
+        _add_to_left_column("Game", left_column_count++);
+    }
+
     if (_is_mask_active(_NUMBER_MASK)) {
         _add_to_left_column("Number", left_column_count++);
     }
@@ -116,33 +137,17 @@ void _render_layer_modifier_state(void) {
         _add_to_left_column("Function", left_column_count++);
     }
 
-    if (_is_mask_active(_GUI_MASK)) {
-        _add_to_left_column("GUI", left_column_count++);
-    }
-
     if (_is_mask_active(_ADJUST_MASK)) {
         _add_to_left_column("Adjust", left_column_count++);
     }
 
-    if (_is_mask_active(_GAME_MASK)) {
-        _add_to_left_column("Game", left_column_count++);
-    }
+    _add_to_right_column("Shift", right_column_count++, _is_mask_active(_SHIFT_MASK));
 
-    if (_is_mask_active(_SHIFT_MASK)) {
-        _add_to_right_column("Shift", right_column_count++);
-    }
+    _add_to_right_column("Ctrl", right_column_count++, _is_mask_active(_CTRL_MASK));
 
-    if (_is_mask_active(_CTRL_MASK)) {
-        _add_to_right_column("Ctrl", right_column_count++);
-    }
+    _add_to_right_column("Alt", right_column_count++, _is_mask_active(_ALT_MASK));
 
-    if (_is_mask_active(_ALT_MASK)) {
-        _add_to_right_column("Alt", right_column_count++);
-    }
-
-    if (_is_mask_active(_OS_MASK)) {
-        _add_to_right_column("Oneshot", right_column_count++);
-    }
+    _add_to_right_column("GUI", right_column_count++, _is_mask_active(_GUI_MASK));
 }
 
 void _render_keyboard_history(char* history) {
