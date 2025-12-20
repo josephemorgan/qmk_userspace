@@ -55,14 +55,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     _______, KC_EXLM,   KC_AT, KC_HASH,  KC_DLR, KC_PERC, KC_CIRC, KC_AMPR, KC_ASTR,   KC_LPRN, KC_RPRN, KC_DEL,
     _______, _______, _______, _______, _______, _______, KC_LEFT, KC_DOWN,   KC_UP,  KC_RIGHT, KC_PGUP, KC_BSLS,
     _______, _______, _______, _______, _______, _______, _______, _______,   ARROW, FAT_ARROW, KC_PGDN, _______,
-    _______, _______, _______, _______, _______, _______, _______, _______, _______,   _______, _______, _______
+    _______, _______, _______, _______, _______, _______, KC_BSPC, _______, _______,   _______, _______, _______
 ),
 
 [_RAISE] = LAYOUT_planck_grid(
     _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,  KC_DEL,
     _______, KC_MINS,   LCURL, KC_LPRN, KC_RPRN,   RCURL, KC_PLUS, KC_ASTR,  KC_EQL,   KC_LT,   KC_GT, KC_BSLS,
     _______, KC_UNDS, _______, KC_LBRC, KC_RBRC, _______, KC_MINS, KC_SLSH, KC_CIRC, KC_AMPR, KC_PIPE, _______,
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
+    _______, _______, _______, _______, _______,  KC_ENT, _______, _______, _______, _______, _______, _______
 ),
 
 /* Adjust (Lower + Raise)
