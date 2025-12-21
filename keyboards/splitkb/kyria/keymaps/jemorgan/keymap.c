@@ -1,3 +1,4 @@
+#include "default_keyboard.h"
 #include "quantum_keycodes.h"
 #include <stdint.h>
 #include <stdlib.h>
@@ -8,7 +9,6 @@
 #include "oled_driver.h"
 #include "quantum.h"
 #include "./secrets.h"
-#include QMK_KEYBOARD_H
 
 #define RAISE OSL(_NUMBER)
 #define LOWER OSL(_SYMBOL)
@@ -68,8 +68,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_ADJUST] = LAYOUT(
         _______, LCAG(KC_1), LCAG(KC_2), LCAG(KC_3), LCAG(KC_4), LCAG(KC_5),                                 _______, _______, _______, _______, _______, _______,
         _______, _______, _______, _______, _______, _______,                                                UG_TOGG, UG_HUEU, UG_SATU, UG_VALU, UG_SPDU, _______,
-        KC_LSFT, _______, _______, _______, _______, _______, _______,        _______,    _______, _______,  _______, RGB_MODE_FORWARD, RGB_MODE_REVERSE, _______, _______, KC_LSFT,
-        _______, TG(_GAME), DF(_QWERTY), TG(_ONESHOT), _JIGG,                                      QK_LEAD, _______, _______, _______, _______
+        KC_LSFT, _______, _______, _______, _______, _______, _______,        _______,    _______, _______,  _______, RM_NEXT, RM_PREV, _______, _______, KC_LSFT,
+        _______, TG(_GAME), DF(_QWERTY), TG(_ONESHOT), _JIGG,                                      QK_LEAD, AC_TOGG, _______, _______, _______
     ),
     [_TRANS] = LAYOUT(
         _______, _______, _______, _______, _______, _______, _______,                                      _______, _______, _______, _______, _______,
@@ -88,16 +88,16 @@ void matrix_scan_user(void) {
         int keycode;
         switch (direction) {
             case 0:
-                keycode = KC_MS_UP;
+                keycode = MS_UP;
                 break;
             case 1:
-                keycode = KC_MS_DOWN;
+                keycode = MS_DOWN;
                 break;
             case 2:
-                keycode = KC_MS_LEFT;
+                keycode = MS_LEFT;
                 break;
             case 3:
-                keycode = KC_MS_RIGHT;
+                keycode = MS_RGHT;
                 break;
         }
 

@@ -1,8 +1,6 @@
 WPM_ENABLE = yes
 OLED_ENABLE = yes
-ENCODER_ENABLE = yes       # Enables the use of one or more encoders
-RGBLIGHT_ENABLE = yes      # Enable keyboard RGB underglow
-MOUSEKEY_ENABLE = yes
+ENCODER_ENABLE = yes       # Enables the use of one or more encoders RGBLIGHT_ENABLE = yes      # Enable keyboard RGB underglow MOUSEKEY_ENABLE = yes
 LEADER_ENABLE = yes
 
 
@@ -16,3 +14,4 @@ MUSIC_ENABLE = no
 
 EXTRAFLAGS += -flto
 CAPS_WORD_ENABLE = yes
+AUTOCORRECT_ENABLE = yes
